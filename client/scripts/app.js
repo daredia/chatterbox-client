@@ -35,44 +35,70 @@
         //   roomname: 'lobby'
         // };
 
+let app = {};
 
-$(document).ready(function() {
-  let app = {};
-  let holder;
+app.init = () => {
+  //initiate the app with loaded messages
+  app.fetch();
+};
 
-  //GET
-  let get = $.ajax({
-    url: 'https://api.parse.com/1/classes/messages',
-    method: 'GET'
-  }).done(function(data) {
-    console.log(data);
-    for (var newMessage of data.results) {
-      var message = newMessage.username + ': ' + newMessage.text;
-      app.addMessage(message);
-    }
-  });
+app._lastShown = 0;
 
-
-  app.addMessage = (message) => {
+//take in data from .fetch and append to DOM
+var showMessages = (data) => {
+  var newMessages = _.filter(data.results, (message) => {
+    return Date.parse(message.createdAt) > app._lastShown;
+  }); // return an array of new messages
+  
+  for (var messageObj of newMessages) {
     var $message = $('<div class=message></div>');
+    var message = messageObj.username + ': ' + messageObj.text;
     $message.text(message);
     $('#chats').append($message);
-  };
+  }
+  console.log(newMessages);
 
-  //POST
+  // setting new timeStamp if there is a new message
+  if (newMessages[0]) {
+    app._lastShown = Date.parse(newMessages[0].createdAt);   
+  }
+};
+
+//GET
+app.fetch = () => {
+  $.ajax({
+    url: 'https://api.parse.com/1/classes/messages',
+    method: 'GET',
+    success: showMessages,
+    error: () => {
+      console.log('error on fetch');
+    }
+  });
+};
+
+//POST
+app.send = (message) => {
+  message = JSON.stringify(message);
   $.ajax({
     url: 'https://api.parse.com/1/classes/messages',
     method: 'POST',
-    data: JSON.stringify({
-      username: 'CC',
-      text: 'whatup',
-      roomname: 'all'
-    }),
-    datatype: 'json'
-  }).done(function() {
-    console.log('sent');
+    data: message,
+    datatype: 'json',
+    success: () => {
+      app.fetch();
+      // draw new messages from parse server; 
+      // keep track of messages that are in the DOM and only append new ones
+    }
   });
+};
 
 
 
+$(document).ready(function() {
+  app.init();
+  app.send({
+    username: 'sd/cc',
+    text: 'yo',
+    roomname: 'all'
+  });
 });
