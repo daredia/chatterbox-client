@@ -84,6 +84,7 @@ describe('chatterbox', function() {
         app.addMessage(message);
 
         expect($('#chats').children().length).to.equal(1);
+
       });
 
       it('should be able to add rooms to the DOM', function() {

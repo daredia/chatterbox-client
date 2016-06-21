@@ -16,9 +16,18 @@
     <div id="main">
       <h1>chatterbox</h1>
       <!-- Your HTML goes here! -->
+      <button id="load">Load new messages</button>
+      <select id="roomSelect">
+        <option value="lobby" selected="selected">Lobby</option>
+      </select>
+      <form id="send">
+        <input type="text" id="username" name="username" placeholder="Enter your username">
+        <input class="submit" type="submit">
+      </form>
+      <textarea rows="3" cols="50" form="compose" name="message" id="message" placeholder="Write message here"></textarea>
     </div>
+    <h1>messages</h1>
     <div id="chats">
-      <h2>messages</h2>
-    </div>
+    </div> 
   </body>
 </html>

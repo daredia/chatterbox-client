@@ -36,6 +36,7 @@
         // };
 
 let app = {};
+app.server = 'https://api.parse.com/1/classes/messages';
 
 app.init = () => {
   //initiate the app with loaded messages
@@ -45,31 +46,41 @@ app.init = () => {
 app._lastShown = 0;
 
 //take in data from .fetch and append to DOM
-var showMessages = (data) => {
-  var newMessages = _.filter(data.results, (message) => {
-    return Date.parse(message.createdAt) > app._lastShown;
-  }); // return an array of new messages
-  
-  for (var messageObj of newMessages) {
-    var $message = $('<div class=message></div>');
-    var message = messageObj.username + ': ' + messageObj.text;
-    $message.text(message);
-    $('#chats').append($message);
-  }
-  console.log(newMessages);
+app.addMessage = (messageObj) => {
+  var $message = $('<div class=message></div>');
+  var message = messageObj.username + ': ' + messageObj.text;
+  $message.text(message);
+  if (app._lastShown) {
 
-  // setting new timeStamp if there is a new message
-  if (newMessages[0]) {
-    app._lastShown = Date.parse(newMessages[0].createdAt);   
-  }
+    $('#chats').prepend($message);  
+  } else {
+    $('#chats').append($message);  
+  }    
+};
+
+app.clearMessages = function() {
+  $('#chats').html('');
 };
 
 //GET
 app.fetch = () => {
   $.ajax({
-    url: 'https://api.parse.com/1/classes/messages',
-    method: 'GET',
-    success: showMessages,
+    url: app.server,
+    type: 'GET',
+    success: (data) => {
+      var newMessages = _.filter(data.results, (message) => {
+        return Date.parse(message.createdAt) > app._lastShown;
+      }); // return an array of new messages;
+
+      for (var messageObj of newMessages) {
+        app.addMessage(messageObj);
+      }
+      
+      if (newMessages[0]) {
+        app._lastShown = Date.parse(newMessages[0].createdAt);
+      }
+      // setting new timeStamp if there is a new message
+    },
     error: () => {
       console.log('error on fetch');
     }
@@ -79,9 +90,10 @@ app.fetch = () => {
 //POST
 app.send = (message) => {
   message = JSON.stringify(message);
+  // console.log('message in app.send:', message);
   $.ajax({
-    url: 'https://api.parse.com/1/classes/messages',
-    method: 'POST',
+    url: app.server,
+    type: 'POST',
     data: message,
     datatype: 'json',
     success: () => {
@@ -92,13 +104,39 @@ app.send = (message) => {
   });
 };
 
+app.handleSubmit = () => {
+  var messageObj = {};
+  messageObj.username = $('#username').val();
+  messageObj.text = $('#message').val();
+  messageObj.roomname = 'lobby';
+  app.send(messageObj);
+  $('#message').val('');
+};
+
+app.addRoom = (roomname) => {
+  var $roomOption = '<option></option>';
+  $roomOption.text = roomname;
+  $('#roomSelect').append($roomOption);
+};
 
 
 $(document).ready(function() {
   app.init();
-  app.send({
-    username: 'sd/cc',
-    text: 'yo',
-    roomname: 'all'
-  });
+  // app.send({
+  //   username: 'sd/cc',
+  //   text: 'yo',
+  //   roomname: 'all'
+  // });
+  // setInterval(app.fetch, 2000);
+  $('#load').on('click', app.fetch);
+
+  $('.submit').on('submit', () => {
+    app.handleSubmit();
+  });    
 });
+
+
+
+
+
+
