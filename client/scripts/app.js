@@ -48,10 +48,14 @@ app._lastShown = 0;
 //take in data from .fetch and append to DOM
 app.addMessage = (messageObj) => {
   var $message = $('<div class=message></div>');
-  var message = messageObj.username + ': ' + messageObj.text;
-  $message.text(message);
+  //TODO: THINK ABOUT THIS. for new messages, check for username class, if 
+  $message.data('user', messageObj.username);
+  console.log('$message.data(user)', $message.data('user'));
+  var $user = $('<span class=username></span>');
+  $user.text(messageObj.username);
+  $message.text(': ' + messageObj.text);
+  $message.prepend($user); 
   if (app._lastShown) {
-
     $('#chats').prepend($message);  
   } else {
     $('#chats').append($message);  
@@ -105,8 +109,10 @@ app.send = (message) => {
 };
 
 app.handleSubmit = () => {
+  var username = window.location.search;
+  username = username.slice(username.indexOf('=') + 1);
   var messageObj = {};
-  messageObj.username = $('#username').val();
+  messageObj.username = username;
   messageObj.text = $('#message').val();
   messageObj.roomname = 'lobby';
   app.send(messageObj);
@@ -119,20 +125,28 @@ app.addRoom = (roomname) => {
   $('#roomSelect').append($roomOption);
 };
 
+app.addFriend = (node) => {
+  $(node).parent().addClass('friend');
+  $(node).parent(); // get username and update the css of it
+};
+
 
 $(document).ready(function() {
   app.init();
-  // app.send({
-  //   username: 'sd/cc',
-  //   text: 'yo',
-  //   roomname: 'all'
-  // });
-  // setInterval(app.fetch, 2000);
+  setInterval(app.fetch, 2000);
   $('#load').on('click', app.fetch);
 
-  $('.submit').on('submit', () => {
+  $('#send').on('submit', (event) => {
+    event.preventDefault();
     app.handleSubmit();
-  });    
+  });
+
+
+// DON'T USE ES6 FOR THIS, IT PRESERVES THE THIS BINDING TO THE DOCUMENT
+  $('#chats').on('click', '.username', function() {
+    console.log($(this));
+    app.addFriend($(this));    
+  });
 });
 
 
