@@ -17,10 +17,7 @@
 let app = {};
 app.server = 'https://api.parse.com/1/classes/messages';
 
-app.init = () => {
-  //initiate the app with loaded messages
-  app.fetch();
-};
+
 
 app._lastShown = 0;
 app._friends = {};
@@ -40,7 +37,8 @@ app.addMessage = (messageObj) => {
   if (!app._rooms[messageObj.roomname]) {
     app.addRoom(messageObj.roomname);
   }
-  $message.addClass(messageObj.roomname);
+  // TO FIX: THIS IS BREAKING IF NO ROOMNAME
+  $message.addClass(messageObj.roomname.split(' ').join('_'));
 
   // adding username
   var $user = $('<span class=username></span>');
@@ -63,13 +61,10 @@ app.addMessage = (messageObj) => {
     $('#chats').append($message);  
   }
 
-  console.log('app._currentRoom:', app._currentRoom);
-  console.log('messageObj.roomname:', messageObj.roomname);
 
   // filter for roomName, if it doesn't match the currentRoom & it's not all Rooms, then hide;
   if (app._currentRoom !== 'All Rooms' && messageObj.roomname !== app._currentRoom) {
     $message.hide();
-    console.log('hidden $message', $message);
   }
 };
 
@@ -146,54 +141,58 @@ app.addFriend = (node) => {
     var $spans = $('span:contains("' + username + '")');
     $spans.parent().addClass('friend');
   }
-  
 };
 
+app.changeRoom = () => {
+  var $selected = $('#roomSelect option:selected');
+  if ($selected.text() === 'New Room...') {
+    app._currentRoom = prompt('Name your new room');
+    app.addRoom(app._currentRoom);
+    // remove the option:selected attribute from the current one and make this new room selected
+    $selected.removeAttr('selected');
+    $('option:contains("' + app._currentRoom + '")').attr('selected', 'selected');
+  } else {
+    app._currentRoom = $selected.text();
+  }
 
-$(document).ready(function() {
+  if (app._currentRoom === 'All Rooms') {
+    $('#chats').children().show();
+  } else {
+    $('#chats').children().hide();
+    var classname = '.' + app._currentRoom;
+    classname = classname.split(' ').join('_');
+    var $roomShow = $(classname);
+    $roomShow.show(); // is show not working?
+  }
+};
 
-// Load chatroom's messages
-  app.init();
+app.init = () => {
+  //initiate the app with loaded messages
+  app.fetch();
 
-// can probably move this into app.init(). it just fetches every 2 seconds.
   setInterval(app.fetch, 2000);
 
-// Load new messages on click
+  // Load new messages on click
   $('#load').on('click', app.fetch);
 
-
-// For submitting the message form
+  // For submitting the message form
   $('#send').on('submit', (event) => {
     event.preventDefault();
     app.handleSubmit();
   });
 
-// DON'T USE ES6 FOR THIS, IT PRESERVES THE THIS BINDING TO THE DOCUMENT
+  // DON'T USE ES6 FOR THIS, IT PRESERVES THE THIS BINDING TO THE DOCUMENT
   $('#chats').on('click', '.username', function() {
     app.addFriend($(this));    
   });
 
-//listener for RoomSelect
-  $('#roomSelect').on('change', function() {
-    var $selected = $('#roomSelect option:selected');
-    if ($selected.text() === 'New Room...') {
-      app._currentRoom = prompt('Name your new room');
-      app.addRoom(app._currentRoom);
-      // remove the option:selected attribute from the current one and make this new room selected
-      $selected.removeAttr('selected');
-      $('option:contains("' + app._currentRoom + '")').attr('selected', 'selected');
-    } else {
-      app._currentRoom = $selected.text();
-    }
+  //listener for RoomSelect
+  $('#roomSelect').on('change', app.changeRoom);
+};
 
-    if (app._currentRoom === 'All Rooms') {
-      $('#chats').children().show();
-    } else {
-      $('#chats').children().hide();
-      $('.' + app._currentRoom).show();
-    }
-
-  });
+$(document).ready(function() {
+// Load chatroom & event listeners
+  app.init();
 });
 
 

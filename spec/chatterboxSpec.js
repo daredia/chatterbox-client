@@ -90,7 +90,8 @@ describe('chatterbox', function() {
       it('should be able to add rooms to the DOM', function() {
         app.addRoom('superLobby');
 
-        expect($('#roomSelect').children().length).to.equal(1);
+        //changed to 2 bc they added a lobby room in the above Mel Brooks message and our default is not lobby
+        expect($('#roomSelect').children().length).to.equal(2);
       });
 
     });
