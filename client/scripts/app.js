@@ -24,27 +24,53 @@ app.init = () => {
 
 app._lastShown = 0;
 app._friends = {};
+app._rooms = {};
+app._currentRoom = 'All Rooms';
 
 //take in data from .fetch and append to DOM
 app.addMessage = (messageObj) => {
   var $message = $('<div class=message></div>');
-  //TODO: THINK ABOUT THIS. for new messages, check for username class, if 
-  // create a friend storage object, search for username in friend object, if true, then add .friend to it
-  // but for old messages, we will have to do a one-time loop everytime a new friend is added. 
-  // another option is creating a customized hash-function-esque numerical friend ID and setting that as a class? 
-  $message.data('user', messageObj.username);
+  
+  // escaping XSS
+  for (var prop in messageObj) {
+    messageObj[prop] = xssFilters.inHTMLData(messageObj[prop]);
+  }
+  
+  // adding roomName to select dropdown if it doesn't exist
+  if (!app._rooms[messageObj.roomname]) {
+    app.addRoom(messageObj.roomname);
+  }
+  $message.addClass(messageObj.roomname);
+
+  // adding username
   var $user = $('<span class=username></span>');
+  $user.text(messageObj.username);
+
+  // testing for friend & adding .friend
   if (app._friends[messageObj.username]) {
     $message.addClass('friend');
   }
-  $user.text(messageObj.username);
+
+  // adding message text
   $message.text(': ' + messageObj.text);
+
   $message.prepend($user); 
+  
+  // deciding order for message to be added
   if (app._lastShown) {
     $('#chats').prepend($message);  
   } else {
     $('#chats').append($message);  
-  }    
+  }
+
+  console.log('app._currentRoom:', app._currentRoom);
+  console.log('messageObj.roomname:', messageObj.roomname);
+
+  // filter for roomName, if it doesn't match the currentRoom & it's not all Rooms, then hide;
+  if (app._currentRoom !== 'All Rooms' && messageObj.roomname !== app._currentRoom) {
+    $message.hide();
+    console.log('hidden $message', $message);
+  }
 };
 
 app.clearMessages = function() {
@@ -81,7 +107,6 @@ app.fetch = () => {
 //POST
 app.send = (message) => {
   message = JSON.stringify(message);
-  // console.log('message in app.send:', message);
   $.ajax({
     url: app.server,
     type: 'POST',
@@ -101,29 +126,27 @@ app.handleSubmit = () => {
   var messageObj = {};
   messageObj.username = username;
   messageObj.text = $('#message').val();
-  messageObj.roomname = 'lobby';
+  messageObj.roomname = app._currentRoom;
   app.send(messageObj);
   $('#message').val('');
 };
 
 app.addRoom = (roomname) => {
-  var $roomOption = '<option></option>';
-  $roomOption.text = roomname;
+  app._rooms[roomname] = true;
+  var $roomOption = $('<option></option>');
+  $roomOption.attr('value', roomname);
+  $roomOption.text(roomname);
   $('#roomSelect').append($roomOption);
 };
 
 app.addFriend = (node) => {
   var username = node.text();
-  console.log('username in addFriend', username);
   if (!app._friends[username]) {
     app._friends[username] = true;
     var $spans = $('span:contains("' + username + '")');
     $spans.parent().addClass('friend');
-    console.log($spans.parent());
   }
   
-  $(node).parent().addClass('friend');
-  $(node).parent(); // get username and update the css of it
 };
 
 
@@ -148,6 +171,28 @@ $(document).ready(function() {
 // DON'T USE ES6 FOR THIS, IT PRESERVES THE THIS BINDING TO THE DOCUMENT
   $('#chats').on('click', '.username', function() {
     app.addFriend($(this));    
+  });
+
+//listener for RoomSelect
+  $('#roomSelect').on('change', function() {
+    var $selected = $('#roomSelect option:selected');
+    if ($selected.text() === 'New Room...') {
+      app._currentRoom = prompt('Name your new room');
+      app.addRoom(app._currentRoom);
+      // remove the option:selected attribute from the current one and make this new room selected
+      $selected.removeAttr('selected');
+      $('option:contains("' + app._currentRoom + '")').attr('selected', 'selected');
+    } else {
+      app._currentRoom = $selected.text();
+    }
+
+    if (app._currentRoom === 'All Rooms') {
+      $('#chats').children().show();
+    } else {
+      $('#chats').children().hide();
+      $('.' + app._currentRoom).show();
+    }
+
   });
 });
 

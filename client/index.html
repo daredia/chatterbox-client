@@ -8,6 +8,7 @@
     <!-- dependencies -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
+    <script src="bower_components/xss-filters/dist/xss-filters.min.js"></script>
     <!-- your scripts -->
     <script src="env/config.js"></script>
     <script src="scripts/app.js"></script>
@@ -18,7 +19,8 @@
       <!-- Your HTML goes here! -->
       <button id="load">Load new messages</button>
       <select id="roomSelect">
-        <option value="lobby" selected="selected">Lobby</option>
+        <option value="All Rooms" selected="selected">All Rooms</option>
+        <option value="New Room">New Room...</option>
       </select>
       <form id="send">
         <!-- <input type="text" id="username" name="username" placeholder="Enter your username"> -->
