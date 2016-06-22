@@ -23,13 +23,18 @@
         <option value="New Room">New Room...</option>
       </select>
       <form id="send">
-        <!-- <input type="text" id="username" name="username" placeholder="Enter your username"> -->
         <input class="submit" type="submit">
       </form>
       <textarea rows="3" cols="50" form="compose" name="message" id="message" placeholder="Write message here"></textarea>
-      <h1>messages</h1>
-      <div id="chats">
-      </div> 
     </div>
+    <h1>messages</h1>
+    <div id="chats">
+    </div> 
+    <script> 
+      $(document).ready(function() {
+        app.init();
+      })
+    </script>
+
   </body>
 </html>
