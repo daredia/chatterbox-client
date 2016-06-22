@@ -98,3 +98,15 @@ h2 {
     cursor: pointer;
 }
 
+.dropdown-menu {
+    width: 200px;
+    
+    
+}
+
+li a {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
+}
+
+

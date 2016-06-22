@@ -3,25 +3,47 @@
   <head>
     <meta charset="utf-8">
     <title>chatterbox</title>
+    <link href="bower_components/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="styles/styles.css">
 
     <!-- dependencies -->
     <script src="bower_components/jquery/dist/jquery.js"></script>
     <script src="bower_components/underscore/underscore.js"></script>
     <script src="bower_components/xss-filters/dist/xss-filters.min.js"></script>
+    <script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
     <!-- your scripts -->
     <script src="env/config.js"></script>
     <script src="scripts/app.js"></script>
   </head>
   <body>
+    <nav class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#">Shez and Carl's Chatterbox</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li id="load"><a href="#">Load New Messages</a></li>
+            <li><a href="#">Change User</a></li>
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Chat Rooms <span class="caret"></span></a>
+              <ul class="dropdown-menu" id="roomSelect">
+                <li><a href="#">New Room...</a></li>
+                <li role="separator" class="divider"></li>
+                <li class="dropdown-header">Join an existing room</li>
+                <li class="active"><a href="#">All Rooms</a></li>
+              </ul>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
     <div id="main">
-      <h1>chatterbox</h1>
-      <!-- Your HTML goes here! -->
-      <button id="load">Load new messages</button>
-      <select id="roomSelect">
+      <!-- <button id="load">Load new messages</button> -->
+      <!-- <select id="roomSelect">
         <option value="All Rooms" selected="selected">All Rooms</option>
         <option value="New Room">New Room...</option>
-      </select>
+      </select> -->
       <form id="send">
         <input class="submit" type="submit">
       </form>

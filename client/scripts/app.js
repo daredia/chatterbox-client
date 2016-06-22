@@ -27,7 +27,7 @@ app.init = () => {
   //initiate the app with loaded messages
   app.fetch();
 
-  setInterval(app.fetch, 2000);
+  // setInterval(app.fetch, 2000);
 
   // Load new messages on click
   $('#load').on('click', app.fetch);
@@ -44,7 +44,7 @@ app.init = () => {
   });
 
   //listener for RoomSelect
-  $('#roomSelect').on('change', app.changeRoom);
+  $('#roomSelect').on('click', 'li', app.changeRoom);
 };
 
 //take in data from .fetch and append to DOM
@@ -161,9 +161,10 @@ app.handleSubmit = () => {
 
 app.addRoom = (roomname) => {
   app._rooms[roomname] = true;
-  var $roomOption = $('<option></option>');
-  $roomOption.attr('value', roomname);
-  $roomOption.text(roomname);
+  var $roomOption = $('<li></li>');
+  var $link = $('<a href="#"></a>');
+  $link.text(roomname);
+  $roomOption.append($link);
   $('#roomSelect').append($roomOption);
 };
 
@@ -176,16 +177,19 @@ app.addFriend = (node) => {
   }
 };
 
-app.changeRoom = () => {
-  var $selected = $('#roomSelect option:selected');
-  if ($selected.text() === 'New Room...') {
+app.changeRoom = (evt) => {
+  $('.active').removeClass('active');
+  var $selected = $(evt.currentTarget);
+  $selected.addClass('active');
+  console.log('$selected inside changeRoom', $selected);
+  if ($selected.children().text() === 'New Room...') {
     app._currentRoom = prompt('Name your new room');
     app.addRoom(app._currentRoom);
     // remove the option:selected attribute from the current one and make this new room selected
-    $selected.removeAttr('selected');
-    $('option:contains("' + app._currentRoom + '")').attr('selected', 'selected');
+    $selected.removeClass('active');
+    $('a:contains("' + app._currentRoom + '")').parent().addClass('active');
   } else {
-    app._currentRoom = $selected.text();
+    app._currentRoom = $selected.children().text();
   }
 
   if (app._currentRoom === 'All Rooms') {
