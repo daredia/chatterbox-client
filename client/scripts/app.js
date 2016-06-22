@@ -83,7 +83,6 @@ app.addMessage = (messageObj) => {
   // deciding order for message to be added
   if (app._lastShown) {
     $('#chats').prepend($message);
-    console.log('$message', $message);
   } else {
     $('#chats').append($message);
   }
@@ -181,7 +180,6 @@ app.changeRoom = (evt) => {
   $('.active').removeClass('active');
   var $selected = $(evt.currentTarget);
   $selected.addClass('active');
-  console.log('$selected inside changeRoom', $selected);
   if ($selected.children().text() === 'New Room...') {
     app._currentRoom = prompt('Name your new room');
     app.addRoom(app._currentRoom);
@@ -199,4 +197,5 @@ app.changeRoom = (evt) => {
     var $roomShow = $('.' + app._currentRoom.split(' ').join('_'));
     $roomShow.fadeIn(800); 
   }
+  $('h2').text(app._currentRoom);
 };
